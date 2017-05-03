@@ -7,7 +7,6 @@
 
 
 
-
 class Sentient_CNC:
 
     def __init__(self):
@@ -29,9 +28,7 @@ class Sentient_CNC:
 
 
 
-    def The_Situation():
-
-
+    def Current_Situation():
 
 
 
@@ -67,14 +64,13 @@ class Sentient_CNC:
 
 
 
-
-
-    def The_Complication():
+    def Complications():
         '''
         I asked our lead machinist, George, the amount of time
         he could leave his machine running unattended.
         His answer was 'zero'.
         '''
+
 
 
 
@@ -98,7 +94,6 @@ class Sentient_CNC:
                                'Cloud Computing'])
 
         return costly_downtime | curr_technology
-
 
 
 
@@ -153,6 +148,7 @@ class Sentient_CNC:
 
 
 
+
     def The_Solution():
 
 
@@ -177,7 +173,7 @@ class Sentient_CNC:
                     'Detection': 'Tool breakage detection - 100% Accurate',
                     'Generalized' : 'Adaptable to any CNC Machine',
                     'PlugAndPlay': 'No Behavior change needed to use device',
-                    'Production': '10 percent improvement in daily output'}
+                    'Production': '10 percent mprovement in daily output'}
 
         return solution
 
@@ -194,13 +190,13 @@ class Sentient_CNC:
 
 
 pitch_deck = Sentient_CNC
-situation = pitch_deck.The_Situation()
+situation = pitch_deck.Current_Situation()
 with open("Pitch Deck.txt", "w") as text_file:
     print('Auto Generated Meeting notes:\n', file=text_file)
     [print(key_point, ':', situation[key_point], file=text_file) \
     for key_point in situation]
     print(file=text_file)
-    print('\n'.join(pitch_deck.The_Complication()), end='\n\n', file=text_file)
+    print('\n'.join(pitch_deck.Complications()), end='\n\n', file=text_file)
     print(pitch_deck.The_Question(), file=text_file)
     solution = pitch_deck.The_Solution()
     [print('{}\t-\t{}'.format(k, solution[k]), file=text_file) for k in solution]
