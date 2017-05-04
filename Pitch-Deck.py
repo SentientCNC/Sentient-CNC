@@ -25,11 +25,7 @@ class Sentient_CNC:
 
 
 
-
-
-
     def Current_Situation():
-
 
 
 
@@ -45,13 +41,14 @@ class Sentient_CNC:
         print('In today\'s manufacturing environment...')
 
         variables = dict({
-            'Technology': 'Powerful and quickly accelerating.. data hungry',
+            'Technology': 'Powerful and quickly accelerating..data hungry',
             'DataSource': 'Uncollected but valuable data from Machines',
             'Machinists': 'Very talented, but few in number',
-            'CNCmachine': 'Actually many, more machines than skilled machinists',
-            'AnEngineer': 'Dedicated to change the world, knowledgable, driven'})
+            'CNCmachine': 'More machines than skilled machinists',
+            'AnEngineer': 'Dedicated to changing the world'})
 
         return variables
+
 
 
 
@@ -70,10 +67,6 @@ class Sentient_CNC:
         he could leave his machine running unattended.
         His answer was 'zero'.
         '''
-
-
-
-
 
 
 
@@ -104,12 +97,7 @@ class Sentient_CNC:
 
 
 
-
-
     def The_Question():
-
-
-
 
 
 
@@ -145,10 +133,6 @@ class Sentient_CNC:
 
 
 
-
-
-
-
     def The_Solution():
 
 
@@ -162,18 +146,16 @@ class Sentient_CNC:
 
 
 
-
-
-        print('We can build an IoT device that will supervise the machine.')
+        print('We build an IoT device that will supervise the machine.')
 
         super_machinist = 'skilled machinist' + 'intelligent assistant'
 
         # Metrics for success
-        solution = {'MoreUptime': '30 minutes more up time per machine per day',
+        solution = {'MoreUptime': '30 minutes more per machine per day',
                     'Detection': 'Tool breakage detection - 100% Accurate',
                     'Generalized' : 'Adaptable to any CNC Machine',
-                    'PlugAndPlay': 'No Behavior change needed to use device',
-                    'Production': '10 percent mprovement in daily output'}
+                    'PlugAndPlay': 'No Behavior change needed',
+                    'Production': '10 percent improvement in production'}
 
         return solution
 
