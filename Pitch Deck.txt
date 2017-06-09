@@ -1,0 +1,29 @@
+Auto Generated Meeting notes:
+
+AnEngineer : Dedicated to change the world, knowledgable, driven
+DataSource : Uncollected but valuable data from Machines
+Technology : Powerful and quickly accelerating.. data hungry
+Machinists : Very talented, but few in number
+CNCmachine : Actually many, more machines than skilled machinists
+
+CHIPS WRAPPING
+Industrial IoT
+FREQUENT SETUP
+PROGRAMMING TIME
+Machine Learning
+Cloud Computing
+LIMITED LABOR
+TOOL BREAKAGE
+Big Data
+
+How Can We Convert Down Time to Money Making Up Time?
+How Can We Extend Our Current Labor Abilities and Capabilites?
+How Can We Avoid Catostrophic Failures On Our Machines?
+How Can We Lower The Skills Gap For New CNC Machinists?
+How Can We Bring Aritifial Intelligence to Manufacturing?
+
+Production	-	10 percent mprovement in daily output
+Generalized	-	Adaptable to any CNC Machine
+MoreUptime	-	30 minutes more up time per machine per day
+Detection	-	Tool breakage detection - 100% Accurate
+PlugAndPlay	-	No Behavior change needed to use device
