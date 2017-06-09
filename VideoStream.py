@@ -1,4 +1,5 @@
 import cv2
+<<<<<<< HEAD
 import sys
 import numpy as np
 import datetime
@@ -80,10 +81,31 @@ while True:
             
 
             
+=======
+import numpy as np
+
+cap = cv2.VideoCapture(0)
+
+print('Beginning Capture Device opening...\n')
+print('Capture device opened?', cap.isOpened())
+
+while True:
+
+    ret, frame = cap.read()
+    gray_image = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
+
+    cv2.imshow('frame', gray_image)
+
+    if cv2.waitKey(1) & 0xFF == ord('q'):
+        break
+>>>>>>> 956eff3a34088be860a0733fd3ed5904bd480f97
 
 # Release the capture
 cap.release()
 cv2.destroyAllWindows()
+<<<<<<< HEAD
 
 #Save image with file name = timestamp and classification
 #classification should be toggled by terminal
+=======
+>>>>>>> 956eff3a34088be860a0733fd3ed5904bd480f97
