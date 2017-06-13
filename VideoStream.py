@@ -3,6 +3,7 @@ import sys
 import numpy as np
 import datetime
 import time
+import ctypes
 
 cap = cv2.VideoCapture(0)
 
@@ -11,6 +12,16 @@ print('Beginning Capture Device opening...\n')
 print('Capture device opened?', cap.isOpened())
 
 running = "n"
+
+# Instructional message
+ctypes.windll.user32.MessageBoxW(
+    0, "Setting up image. Press 'q' to quit", "Video Streamer", 1)
+
+# get screen size
+screensize = {}
+user32 = ctypes.windll.user32
+screensize['x'] = user32.GetSystemMetrics(0)
+screensize['y'] = user32.GetSystemMetrics(1)
 
 
 def newAverageColorGrayscale(image):
@@ -31,11 +42,30 @@ while True:
     # initialize camera
     ret, frame = cap.read()
 
-    # take a picture
-    image = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
+    # transform image data into different color spaces
+    image = {
+        'RGB': cv2.cvtColor(frame, 0),
+        'Lab': cv2.cvtColor(frame, cv2.COLOR_RGB2Lab),
+        'Luv': cv2.cvtColor(frame, cv2.COLOR_RGB2Luv),
+        'HLS': cv2.cvtColor(frame, cv2.COLOR_RGB2HLS)
 
-    # show the picture
-    cv2.imshow('frame', image)
+    }
+
+    # stream image with sample transformations
+    idx = 0
+    for key in image.keys():
+
+        # image sizing perameters
+        im_count = len(image)
+        im_length = screensize['x'] // im_count
+
+        name = '{} transformation'.format(key)
+
+        cv2.imshow(name, image[key])
+        cv2.resizeWindow(name, im_length, im_length)
+        cv2.moveWindow(name, idx * im_length, 0)
+
+        idx += 1
 
     # listen for keyboard input
     status = cv2.waitKey(1) & 0xFF
@@ -50,6 +80,9 @@ while True:
 
     elif status == ord('n'):
         running = "n"
+
+    elif status == ord('q'):
+        break
 
     if running == "g":
         if (abs(newAverageColorGrayscale(image) - average_color) > 1):
