@@ -1,10 +1,17 @@
 from google.cloud import datastore
 import datetime
+import numpy as np
 
 
 class data_handler():
     """
     Object designed to handle storage of incoming sensor data.
+
+    How to use:
+        Initialize the handler object, then use the .write function
+        to push the sensor data to the cloud storage. Sensor data should
+        be packaged as a dictionary of values.
+
     Args:
     project_id: string
         Project ID per Google Cloud's project ID (see Cloud Console)
@@ -34,17 +41,13 @@ class data_handler():
 
         # Create key for timestamp
         if not timestamp:
-            data_snapshot = self.client.key(self.sensor_node,
-                                            datetime.datetime)
-            time = datetime.datetime
-        else:
-            data_snapshot = self.client.key(self.sensor_node,
-                                            timestamp)
-            time = timestamp
+            timestamp = datetime.datetime.now()
+
+        data_snapshot = self.client.key(self.sensor_node, timestamp)
 
         entry = datastore.Entity(data_snapshot)
         entry.update(sensor_data)
-        entry.update({'created': time})
+        entry.update({'created': timestamp})
 
         # Push the data entry to the cloud
         self.client.put(entry)
@@ -65,3 +68,22 @@ class data_handler():
         query.order = ['created']
 
         return list(query.fetch())
+
+
+if __name__ == "__main__":
+
+    curr_time = datetime.datetime.now()
+    data_package = {'camera': np.arange(30000).reshape((100, 100, 3)),
+                    'mic': np.arange(100).reshape((1, 100)),
+                    'created': curr_time,
+                    'label': 'Running'}
+
+    print('Executing test run....\n\n\tCurrent time: {}'
+          .format(curr_time))
+
+    for key in data_package:
+        print('\n{} sensor:\n\n{}'.format(key, data_package[key]))
+
+    data = data_handler()
+
+    data.write(data_package, curr_time)
