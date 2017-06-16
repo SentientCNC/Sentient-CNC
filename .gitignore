@@ -32,6 +32,7 @@ python-docs-samples-master
 *.log
 *.sql
 *.sqlite
+*.json
 
 # OS generated files #
 ######################
