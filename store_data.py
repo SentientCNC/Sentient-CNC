@@ -36,12 +36,15 @@ class data_handler():
         if not timestamp:
             data_snapshot = self.client.key(self.sensor_node,
                                             datetime.datetime)
+            time = datetime.datetime
         else:
             data_snapshot = self.client.key(self.sensor_node,
                                             timestamp)
+            time = timestamp
 
         entry = datastore.Entity(data_snapshot)
         entry.update(sensor_data)
+        entry.update({'created': time})
 
         # Push the data entry to the cloud
         self.client.put(entry)
@@ -57,17 +60,8 @@ class data_handler():
             entry['transacted'] = True
             self.client.put(entry)
 
+    def list_entries(self):
+        query = self.client.query(kind=self.sensor_node)
+        query.order = ['created']
 
-def delete_task(client, task_id):
-    '''
-    deletes a task entity, using the task entity's key
-    '''
-    key = client.key('Task', task_id)
-    client.delete(key)
-
-
-def list_tasks(client):
-    query = client.query(kind='Task')
-    query.order = ['created']
-
-    return list(query.fetch())
+        return list(query.fetch())
