@@ -43,40 +43,19 @@ class data_handler():
         entry = datastore.Entity(data_snapshot)
         entry.update(sensor_data)
 
-        client.put(entry)
+        # Push the data entry to the cloud
+        self.client.put(entry)
 
-        with client.transaction():
+        # Check to make sure entry was added to DataStore
+        with self.client.transaction():
+            entry_exists = self.client.get(data_snapshot)
 
+            if not entry_exists:
+                raise ValueError(
+                    'Entry {} was not pushed'.format(data_snapshot))
 
-def add_task(client, description):
-    key = client.key('Task')
-
-    task = datastore.entity(key, exclude_from_indexes=['description'])
-
-    task.update({
-        'created': datetime.datetime.utcnow(),
-        'description': description,
-        'done': False
-    })
-
-    client.put(task
-
-
-    return task.key
-
-
-def mark_done(client, task_id):
-    with client.transaction():
-        key = client.key('Task', task_id)
-        task = client.get(key)
-
-        if not task:
-            raise ValueError(
-                'Task {} does not exist'.format(task_id))
-
-        task['done'] = True
-
-        client.put(task)
+            entry['transacted'] = True
+            self.client.put(entry)
 
 
 def delete_task(client, task_id):
