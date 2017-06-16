@@ -1,7 +1,13 @@
+from oauth2client.client import GoogleCredentials
 from google.cloud import datastore
 import datetime
 import numpy as np
+import os
+import sys
 
+os.environ['GOOGLE_APPLICATION_CREDENTIALS'] = \
+    "/Users/joshua/Documents/Sentient-CNC/SentientCNC-3c8c6f014588.json"
+sys.exit()
 
 class data_handler():
     """
@@ -27,6 +33,7 @@ class data_handler():
         # requests to Google Cloud API using the API's client libraries.
         self.client = datastore.Client(project_id)
         self.device = self.client.key(sensor_node)
+        self.access = GoogleCredentials.get_application_default()
 
     def write(self, sensor_data, timestamp=None):
         """
@@ -45,12 +52,15 @@ class data_handler():
 
         data_snapshot = self.client.key(self.sensor_node, timestamp)
 
+        print('data key generated:', data_snapshot)
+
         entry = datastore.Entity(data_snapshot)
         entry.update(sensor_data)
         entry.update({'created': timestamp})
 
         # Push the data entry to the cloud
-        self.client.put(entry)
+        self.client.put(entry, credentials=self.access)
+        print('data pushed to cloud. Entry', entry)
 
         # Check to make sure entry was added to DataStore
         with self.client.transaction():
@@ -80,9 +90,6 @@ if __name__ == "__main__":
 
     print('Executing test run....\n\n\tCurrent time: {}'
           .format(curr_time))
-
-    for key in data_package:
-        print('\n{} sensor:\n\n{}'.format(key, data_package[key]))
 
     data = data_handler()
 
