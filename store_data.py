@@ -1,15 +1,26 @@
 from oauth2client.client import GoogleCredentials
 from google.cloud import datastore
+from google.cloud import storage
+from google.cloud import exceptions
+from google.auth import app_engine
+
 import datetime
 import numpy as np
 import pickle
 import os
 import cv2
 import sys
+import string
 
-os.environ['GOOGLE_APPLICATION_CREDENTIALS'] = \
-    "/Users/joshua/Documents/Sentient-CNC/SentientCNC-3c8c6f014588.json"
+# Establish cloud credientials
+home_path = os.path.expanduser('~')
+auth_path = "/Documents/Sentient-CNC/SentientCNC-3c8c6f014588.json"
+auth_file_path = string.join(home_path, auth_path)
 
+credentials = app_engine.Credentials()
+os.environ['GOOGLE_APPLICATION_CREDENTIALS'] = auth_file_path
+
+sys.exit()
 
 class data_handler():
     """
@@ -54,6 +65,7 @@ class data_handler():
 
         data_snapshot = self.client.key(self.sensor_node, timestamp)
 
+        # Create the database entity (equivalent to a row entry in a table)
         entry = datastore.Entity(data_snapshot)
         entry.update(sensor_data)
         entry.update({'created': timestamp})
@@ -80,7 +92,26 @@ class data_handler():
         return list(query.fetch())
 
 
+def create_bucket(bucket_name):
+    """Creates a new bucket."""
+    storage_client = storage.Client()
+    bucket = storage_client.create_bucket(bucket_name)
+    print('Bucket {} created'.format(bucket.name))
+
+
 if __name__ == "__main__":
+
+    # Get storage bucket for image files
+    storage = storage.Client(credentials=credentials)  # Need to sort out credentials
+    try:
+        print('retrieving bucked: Active\n')
+        bucket = storage.lookup_bucket('active')
+        assert isinstance(bucket, Bucket) # not sure if this works... 
+    except exceptions.NotFound:
+        print('Active bucket does not exit. Creating bucket...\n\n')
+        bucket = storage.create_bucket('active')
+
+    sys.exit()
 
     # Get current time for data key storage and 'created' parameter
     curr_time = str(datetime.datetime.now())
@@ -91,7 +122,7 @@ if __name__ == "__main__":
     capture.release()
     cv2.destroyAllWindows()
 
-    # Trying to convert the cv2 frame object into something useable... 
+    # Trying to convert the cv2 frame object into something useable...
     frame_list = np.array(frame)
     frame_list = frame_list.tolist()
     frame_pickle = pickle.dumps(frame)
@@ -107,15 +138,14 @@ if __name__ == "__main__":
 
     # Psuedo sensor data dictionary
     # Collected values of all sensors at a given time instance
-    data_package = {'camera': frame_list,
+    data_package = {'created': curr_time,
                     'mic': [2, 3, 3, 3],
-                    'created': curr_time,
                     'label': 'Running'}
 
     print('Executing test run....\n\n\tCurrent time: {}'
           .format(curr_time), '\ndata type:', type(curr_time))
 
-    # Can't write image object to NoSQL database... 
+    # Can't write image object to NoSQL database...
     ##################################################
     # data = data_handler()
     # data.write(sensor_data=data_package, timestamp=curr_time)
