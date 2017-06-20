@@ -5,6 +5,7 @@ import datetime
 # import time
 import pyaudio
 # from audiostream import *
+from store_data import data_handler
 
 
 def newAverageColorGrayscale(image):
@@ -40,13 +41,13 @@ if __name__ == '__main__':
 
     moments = []
     metadata = {
-        'frame_width': cap.get(id=3),
-        'frame_height': cap.get(id=4),
-        'fps': cap.get(id=5),
-        'brightness': cap.get(id=10),
-        'contrast': cap.get(id=11),
-        'saturation': cap.get(id=12),
-        'exposure': cap.get(id=15)
+        'frame_width': cap.get(propId=3),
+        'frame_height': cap.get(propId=4),
+        'fps': cap.get(propId=5),
+        'brightness': cap.get(propId=10),
+        'contrast': cap.get(propId=11),
+        'saturation': cap.get(propId=12),
+        'exposure': cap.get(propId=15)
     }
 
     print('Beginning Capture Device opening...\n')
@@ -87,13 +88,13 @@ if __name__ == '__main__':
     average_color = 0
 
     # from audiostream
-    tt = TapTester()
+    # tt = TapTester()
 
     counter = 0
     run = True
     while run:
         # listen
-        audio = tt.listen()
+        # audio = tt.listen()
 
         # initialize camera
         ret, image = cap.read()
@@ -106,6 +107,7 @@ if __name__ == '__main__':
 
         # listen for keyboard input
         status = cv2.waitKey(1) & 0xFF
+
         if status == ord('b'):
             print ("bad status")
             running = "b"
@@ -116,21 +118,29 @@ if __name__ == '__main__':
         elif status == ord('n'):
             running = "n"
 
+        elif status == ord('q'):
+            break
+
         if running == "g":
             if (abs(newAverageColorGrayscale(image) - average_color) > 1):
                 print('motion detected')
 
             average_color = newAverageColorGrayscale(image)
-            cv2.imwrite("/home/pi/sentient-cnc/images/good{}.jpg"
-                        .format(datetime.datetime.now()), image)
+            # cv2.imwrite("/home/pi/sentient-cnc/images/good{}.jpg"
+            #             .format(datetime.datetime.now()), image)
         elif running == "b":
-            cv2.imwrite("/home/pi/sentient-cnc/images/bad{}.jpg"
-                        .format(datetime.datetime.now()), image)
+            # cv2.imwrite("/home/pi/sentient-cnc/images/bad{}.jpg"
+            #             .format(datetime.datetime.now()), image)
+            pass
 
-        moments.append({"audio": audio,
+        moments.append({"audio": "audio",
                         "image": image,
                         "timestamp": datetime.datetime.now()
                         })
+        moments.append(metadata)
+
+        # data_handler.write(moments)
+
         if counter > 30:
             run = False
         counter += 1
