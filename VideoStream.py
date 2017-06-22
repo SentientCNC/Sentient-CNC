@@ -5,17 +5,6 @@ import datetime
 import time
 import ctypes
 
-cap = cv2.VideoCapture(0)
-
-
-print('Beginning Capture Device opening...\n')
-print('Capture device opened?', cap.isOpened())
-
-running = "n"
-
-# Instructional message
-ctypes.windll.user32.MessageBoxW(
-    0, "Setting up image. Press 'q' to quit", "Video Streamer", 1)
 
 # get screen size
 screensize = {}
@@ -30,40 +19,58 @@ def newAverageColorGrayscale(image):
     input: image object from cv2
     output: singel pixel value, would return 3 values if we were not doing grayscale
     '''
-    average_color_per_row = np.average(image, axis=0)
-    average_color = np.average(average_color_per_row, axis=0)
+
+    average_color = np.average(image)  # average _color_per_row, axis=0)
     return average_color
 
 
 # initialize average color for something to compare to
 average_color = 0
+im_returned = True
+checkpoint = 0
+
+# initualize video capture object
+cap = cv2.VideoCapture(0)
+im_width = int(cap.get(3))
+im_height = int(cap.get(4))
+frame_num = 0
+running = "n"
 
 while True:
-    # initialize camera
-    ret, frame = cap.read()
+    frame_num += 1
+
+    # reads in next frame
+    im_returned, frame = cap.read()
+
+    # Make sure data is coming through the camera
+    if not im_returned:
+        print('image not returned from capture device.')
+        break
 
     # transform image data into different color spaces
     image = {
         'RGB': cv2.cvtColor(frame, 0),
-        'Lab': cv2.cvtColor(frame, cv2.COLOR_RGB2Lab),
-        'Luv': cv2.cvtColor(frame, cv2.COLOR_RGB2Luv),
-        'HLS': cv2.cvtColor(frame, cv2.COLOR_RGB2HLS)
-
+        # 'Lab': cv2.cvtColor(frame, cv2.COLOR_RGB2Lab),
+        # 'Luv': cv2.cvtColor(frame, cv2.COLOR_RGB2Luv),
+        # 'HLS': cv2.cvtColor(frame, cv2.COLOR_RGB2HLS)
     }
 
     # stream image with sample transformations
     idx = 0
     for key in image.keys():
 
-        # image sizing perameters
+        # image sizing perametersq
         im_count = len(image)
-        im_length = screensize['x'] // im_count
 
         name = '{} transformation'.format(key)
 
-        cv2.imshow(name, image[key])
-        cv2.resizeWindow(name, im_length, im_length)
-        cv2.moveWindow(name, idx * im_length, 0)
+        if im_count > 1:
+            im_width = screensize['x'] // im_count
+            cv2.resizeWindow(name, im_width, im_height)
+            cv2.moveWindow(name, idx * im_width, 0)
+            cv2.imshow(name, image[key])
+        else:
+            cv2.imshow(name, image[key])
 
         idx += 1
 
@@ -85,21 +92,24 @@ while True:
         break
 
     if running == "g":
-        if (abs(newAverageColorGrayscale(image) - average_color) > 1):
-            print('motion detected')
 
-        average_color = newAverageColorGrayscale(image)
-        cv2.imwrite(
-            "/home/pi/sentient-cnc/images/good{}.jpg"
-            .format(datetime.datetime.now()), image)
+        if (abs(newAverageColorGrayscale(image['RGB']) - average_color) > 1):
+            print('motion detected')
+            print('writing frame {}; label: machine running'.format(frame_num))
+
+        average_color = newAverageColorGrayscale(image['RGB'])
+        # cv2.imwrite(
+        #     "/home/pi/sentient-cnc/images/good{}.jpg"
+        #     .format(datetime.datetime.now()), image)
 
     elif running == "b":
-        cv2.imwrite(
-            "/home/pi/sentient-cnc/images/bad{}.jpg"
-            .format(datetime.datetime.now()), image)
+        print('writing frame {}; label: machine idle'.format(frame_num))
+        # cv2.imwrite(
+        #     "/home/pi/sentient-cnc/images/bad{}.jpg"
+        #     .format(datetime.datetime.now()), image)
 
+        # Release the capture
 
-# Release the capture
 cap.release()
 cv2.destroyAllWindows()
 
