@@ -1,117 +1,153 @@
 import cv2
-import sys
+# import sys
 import numpy as np
 import datetime
-import time
-import ctypes
-
-
-# get screen size
-screensize = {}
-user32 = ctypes.windll.user32
-screensize['x'] = user32.GetSystemMetrics(0)
-screensize['y'] = user32.GetSystemMetrics(1)
+# import time
+import pyaudio
+# from audiostream import *
+from store_data import data_handler
 
 
 def newAverageColorGrayscale(image):
     '''
     Finds average color of an image's pixels
     input: image object from cv2
-    output: singel pixel value, would return 3 values if we were not doing grayscale
+    output: singel pixel value, would return
+    3 values if we were not doing grayscale
     '''
-
-    average_color = np.average(image)  # average _color_per_row, axis=0)
+    average_color_per_row = np.average(image, axis=0)
+    average_color = np.average(average_color_per_row, axis=0)
     return average_color
 
 
-# initialize average color for something to compare to
-average_color = 0
-im_returned = True
-checkpoint = 0
+def callback(in_data, frame_count, time_info, flag):
 
-# initualize video capture object
-cap = cv2.VideoCapture(0)
-im_width = int(cap.get(3))
-im_height = int(cap.get(4))
-frame_num = 0
-running = "n"
+    global b, a, fulldata, dry_data, frames
 
-while True:
-    frame_num += 1
+    audio_data = np.fromstring(in_data, dtype=np.float32)
+    dry_data = np.append(dry_data, audio_data)
+    fulldata = np.append(fulldata, audio_data)
 
-    # reads in next frame
-    im_returned, frame = cap.read()
+    return (audio_data, pyaudio.paContinue)
 
-    # Make sure data is coming through the camera
-    if not im_returned:
-        print('image not returned from capture device.')
-        break
 
-    # transform image data into different color spaces
-    image = {
-        'RGB': cv2.cvtColor(frame, 0),
-        # 'Lab': cv2.cvtColor(frame, cv2.COLOR_RGB2Lab),
-        # 'Luv': cv2.cvtColor(frame, cv2.COLOR_RGB2Luv),
-        # 'HLS': cv2.cvtColor(frame, cv2.COLOR_RGB2HLS)
+def test():
+    return True
+
+
+if __name__ == '__main__':
+
+    cap = cv2.VideoCapture(0)
+
+    moments = []
+    metadata = {
+        'frame_width': cap.get(propId=3),
+        'frame_height': cap.get(propId=4),
+        'fps': cap.get(propId=5),
+        'brightness': cap.get(propId=10),
+        'contrast': cap.get(propId=11),
+        'saturation': cap.get(propId=12),
+        'exposure': cap.get(propId=15)
     }
 
-    # stream image with sample transformations
-    idx = 0
-    for key in image.keys():
+    print('Beginning Capture Device opening...\n')
+    print('Capture device opened?', cap.isOpened())
+    print('Video Capture Parameters\n-----------------\n\n')
 
-        # image sizing perametersq
-        im_count = len(image)
+    for k in metadata.keys():
+        print('{}: {}'.format(k, metadata[k]))
 
-        name = '{} transformation'.format(key)
+    running = "n"
 
-        if im_count > 1:
-            im_width = screensize['x'] // im_count
-            cv2.resizeWindow(name, im_width, im_height)
-            cv2.moveWindow(name, idx * im_width, 0)
-            cv2.imshow(name, image[key])
-        else:
-            cv2.imshow(name, image[key])
+    # chunk = 1024
 
-        idx += 1
+    # p = pyaudio.PyAudio()
+    # fulldata = np.array([])
+    # dry_data = np.array([])
 
-    # listen for keyboard input
-    status = cv2.waitKey(1) & 0xFF
+    # stream = p.open(format=pyaudio.paInt16,
+    #                channels=1,
+    #                rate=16000,
+    #                input=True,
+    #                frames_per_buffer=1024)
 
-    if status == ord('b'):
-        print("bad status")
-        running = "b"
+    # in_speech_bf = False
 
-    elif status == ord('g'):
-        print("back to normal")
-        running = "g"
+    # ##decoder.start_utt()
 
-    elif status == ord('n'):
-        running = "n"
+    # while True:
+    #    if stream.is_stopped():
+    #        stream.start_stream()
+    #    buf = stream.read(1024)
+    #    if buf:
+    #        stream.stop_stream()
+    #        decoder.process_raw(buf, False, False)
 
-    elif status == ord('q'):
-        break
 
-    if running == "g":
+    # initialize average color for something to compare to
+    average_color = 0
 
-        if (abs(newAverageColorGrayscale(image['RGB']) - average_color) > 1):
-            print('motion detected')
-            print('writing frame {}; label: machine running'.format(frame_num))
+    # from audiostream
+    # tt = TapTester()
 
-        average_color = newAverageColorGrayscale(image['RGB'])
-        # cv2.imwrite(
-        #     "/home/pi/sentient-cnc/images/good{}.jpg"
-        #     .format(datetime.datetime.now()), image)
+    counter = 0
+    run = True
+    while run:
+        # listen
+        # audio = tt.listen()
 
-    elif running == "b":
-        print('writing frame {}; label: machine idle'.format(frame_num))
-        # cv2.imwrite(
-        #     "/home/pi/sentient-cnc/images/bad{}.jpg"
-        #     .format(datetime.datetime.now()), image)
+        # initialize camera
+        ret, image = cap.read()
 
-        # Release the capture
+        # process the picture
+        # image = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)
 
-cap.release()
-cv2.destroyAllWindows()
+        # how the picture
+        cv2.imshow('image', image)
 
-# Save image with file name = timestamp and classification
-# classification should
+        # listen for keyboard input
+        status = cv2.waitKey(1) & 0xFF
+
+        if status == ord('b'):
+            print ("bad status")
+            running = "b"
+
+        elif status == ord('g'):
+            print ("back to normal")
+            running = "g"
+        elif status == ord('n'):
+            running = "n"
+
+        elif status == ord('q'):
+            break
+
+        if running == "g":
+            if (abs(newAverageColorGrayscale(image) - average_color) > 1):
+                print('motion detected')
+
+            average_color = newAverageColorGrayscale(image)
+            # cv2.imwrite("/home/pi/sentient-cnc/images/good{}.jpg"
+            #             .format(datetime.datetime.now()), image)
+        elif running == "b":
+            # cv2.imwrite("/home/pi/sentient-cnc/images/bad{}.jpg"
+            #             .format(datetime.datetime.now()), image)
+            pass
+
+        moments.append({"audio": "audio",
+                        "image": image,
+                        "timestamp": datetime.datetime.now()
+                        })
+        moments.append(metadata)
+
+        # data_handler.write(moments)
+
+        if counter > 30:
+            run = False
+        counter += 1
+
+    for moment in moments:
+        print(moment["audio"], moment["timestamp"])
+
+    # Release the capture
+    cap.release()
+    cv2.destroyAllWindows()
