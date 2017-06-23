@@ -1,8 +1,54 @@
 from google.cloud import datastore
 from google.cloud import storage
 import datetime
+<<<<<<< HEAD
 import os
 import cv2
+||||||| merged common ancestors
+import numpy as np
+import pickle
+import os
+import cv2
+import sys
+import string
+
+# Establish cloud credientials
+home_path = os.path.expanduser('~')
+auth_path = "/Documents/Sentient-CNC/SentientCNC-3c8c6f014588.json"
+auth_file_path = string.join(home_path, auth_path)
+
+credentials = app_engine.Credentials()
+os.environ['GOOGLE_APPLICATION_CREDENTIALS'] = auth_file_path
+=======
+
+# import numpy as np
+# import pickle
+# import os
+# import cv2
+# import sys
+
+# # Establish cloud credientials
+# home_path = os.path.expanduser('~')
+# auth_path = "/Documents/Sentient-CNC/SentientCNC-3c8c6f014588.json"
+# auth_file_path = home_path + auth_path
+
+# os.environ['GOOGLE_APPLICATION_CREDENTIALS'] = auth_file_path
+
+
+# # Imports the Google Cloud client library
+# from google.cloud import storage
+
+# Instantiates a client
+storage_client = storage.Client()
+
+# The name for the new bucket
+bucket_name = 'my-new-bucket'
+
+# Creates the new bucket
+bucket = storage_client.create_bucket(bucket_name)
+
+print('Bucket {} created.'.format(bucket.name))
+>>>>>>> 3e9d3071593b3fb4432a77401fbcce8453fa080c
 
 
 class data_handler():
@@ -21,12 +67,14 @@ class data_handler():
         Identifier for sensor gateway. This is used as a primary key for
         storing data entries (so data can be viewed per device)
     """
+
     def __init__(self,
                  project='sentientcnc-1',
                  sensor_name='cncmill-001'):
 
         # Creates an authorized service object to make authenticated
         # requests to Google Cloud API using the API's client libraries.
+<<<<<<< HEAD
         self.sensor_name = sensor_name
         self.datastore = datastore.Client(project)
         self.storage = storage.Client(project)
@@ -84,6 +132,14 @@ class data_handler():
 
         else:
             return 'NaN'
+||||||| merged common ancestors
+        self.sensor_node = sensor_node
+        self.client = datastore.Client(project_id)
+        self.access = GoogleCredentials.get_application_default()
+=======
+        self.sensor_node = sensor_node
+        self.client = datastore.Client(project_id)
+>>>>>>> 3e9d3071593b3fb4432a77401fbcce8453fa080c
 
     def write(self, sensor_data, timestamp=None):
         """
@@ -137,6 +193,7 @@ class data_handler():
         return list(query.fetch())
 
 
+<<<<<<< HEAD
 if __name__ == "__main__":
 
     # image snapshot
@@ -156,3 +213,90 @@ if __name__ == "__main__":
     data = data_handler()
     data.write(sensor_data=data_package)
     ##################################################
+||||||| merged common ancestors
+def create_bucket(bucket_name):
+    """Creates a new bucket."""
+    storage_client = storage.Client()
+    bucket = storage_client.create_bucket(bucket_name)
+    print('Bucket {} created'.format(bucket.name))
+
+
+if __name__ == "__main__":
+
+    # Get storage bucket for image files
+    storage = storage.Client(credentials=credentials)  # Need to sort out credentials
+    try:
+        print('retrieving bucked: Active\n')
+        bucket = storage.lookup_bucket('active')
+        assert isinstance(bucket, Bucket) # not sure if this works... 
+    except exceptions.NotFound:
+        print('Active bucket does not exit. Creating bucket...\n\n')
+        bucket = storage.create_bucket('active')
+
+    sys.exit()
+
+    # Get current time for data key storage and 'created' parameter
+    curr_time = str(datetime.datetime.now())
+
+    # image snapshot
+    capture = cv2.VideoCapture(0)
+    ret, frame = capture.read()
+    capture.release()
+    cv2.destroyAllWindows()
+
+    # Trying to convert the cv2 frame object into something useable...
+    frame_list = np.array(frame)
+    frame_list = frame_list.tolist()
+    frame_pickle = pickle.dumps(frame)
+
+    # info
+    print('frame captured. converted to list. shape:', len(frame_list))
+    print()
+    print('frame size:', sys.getsizeof(frame))
+    print('frame list size:', sys.getsizeof(frame_list))
+    print('frame pickle size:', sys.getsizeof(frame_pickle))
+    print()
+    print('frame pickle:', frame_pickle[0:3])
+
+    # Psuedo sensor data dictionary
+    # Collected values of all sensors at a given time instance
+    data_package = {'created': curr_time,
+                    'mic': [2, 3, 3, 3],
+                    'label': 'Running'}
+
+    print('Executing test run....\n\n\tCurrent time: {}'
+          .format(curr_time), '\ndata type:', type(curr_time))
+
+    # Can't write image object to NoSQL database...
+    ##################################################
+    # data = data_handler()
+    # data.write(sensor_data=data_package, timestamp=curr_time)
+    ##########################################################
+=======
+def create_bucket(bucket_name):
+    """Creates a new bucket."""
+    storage_client = storage.Client()
+    bucket = storage_client.create_bucket(bucket_name)
+    print('Bucket {} created'.format(bucket.name))
+
+
+# if __name__ == "__main__":
+
+#     # Get current time for data key storage and 'created' parameter
+#     curr_time = str(datetime.datetime.now())
+
+#     # Psuedo sensor data dictionary
+#     # Collected values of all sensors at a given time instance
+#     data_package = {'created': curr_time,
+#                     'mic': [2, 3, 3, 3],
+#                     'label': 'Running'}
+
+#     print('Executing test run....\n\n\tCurrent time: {}'
+#           .format(curr_time), '\ndata type:', type(curr_time))
+
+#     # Can't write image object to NoSQL database...
+#     ##################################################
+#     # data = data_handler()
+#     # data.write(sensor_data=data_package, timestamp=curr_time)
+#     ##########################################################
+>>>>>>> 3e9d3071593b3fb4432a77401fbcce8453fa080c
