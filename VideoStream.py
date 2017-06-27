@@ -31,45 +31,41 @@ def callback(in_data, frame_count, time_info, flag):
     return (audio_data, pyaudio.paContinue)
 
 
-def test():
-    return True
-
-
 if __name__ == '__main__':
 
     cap = cv2.VideoCapture(0)
 
     moments = []
+
+    # data label dictionary
+    label = {ord('b'): 'tool break',
+             ord('d'): 'tool dull',
+             ord('g'): 'machine okay',
+             ord('n'): 'machine problem',
+             ord('i'): 'machine idle',
+             255: 'No Entry'}
+
     metadata = {
         'frame_width': cap.get(propId=3),
         'frame_height': cap.get(propId=4),
-        'fps': cap.get(propId=5),
-        'brightness': cap.get(propId=10),
-        'contrast': cap.get(propId=11),
-        'saturation': cap.get(propId=12),
-        'exposure': cap.get(propId=15)
     }
 
     print('Beginning Capture Device opening...\n')
     print('Capture device opened?', cap.isOpened())
     print('Video Capture Parameters\n-----------------\n\n')
 
-    for k in metadata.keys():
-        print('{}: {}'.format(k, metadata[k]))
-
     running = "n"
+    chunk = 1024
 
-    # chunk = 1024
-
-    # p = pyaudio.PyAudio()
     # fulldata = np.array([])
     # dry_data = np.array([])
 
-    # stream = p.open(format=pyaudio.paInt16,
-    #                channels=1,
-    #                rate=16000,
-    #                input=True,
-    #                frames_per_buffer=1024)
+    p = pyaudio.PyAudio()
+    stream = p.open(format=pyaudio.paInt16,
+                    channels=1,
+                    rate=16000,
+                    input=True,
+                    frames_per_buffer=1024)
 
     # in_speech_bf = False
 
@@ -83,7 +79,6 @@ if __name__ == '__main__':
     #        stream.stop_stream()
     #        decoder.process_raw(buf, False, False)
 
-
     # initialize average color for something to compare to
     average_color = 0
 
@@ -92,48 +87,34 @@ if __name__ == '__main__':
 
     counter = 0
     run = True
+    # Initialize an input (no key creates a value of 255)
+    user_input = cv2.waitKey(0) & 0xFF
+
     while run:
         # listen
         # audio = tt.listen()
 
-        # initialize camera
+        # read a frame from camera
         ret, image = cap.read()
 
-        # process the picture
-        # image = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)
-
-        # how the picture
+        # show the picture
         cv2.imshow('image', image)
 
         # listen for keyboard input
-        status = cv2.waitKey(1) & 0xFF
+        last_input = user_input
+        user_input = cv2.waitKey(1) & 0xFF
 
-        if status == ord('b'):
-            print ("bad status")
-            running = "b"
+        if user_input is not last_input:
+            print('user input:', label.get(user_input, 'Not found'))
 
-        elif status == ord('g'):
-            print ("back to normal")
-            running = "g"
-        elif status == ord('n'):
-            running = "n"
-
-        elif status == ord('q'):
+        if user_input == ord('q'):
             break
 
-        if running == "g":
-            if (abs(newAverageColorGrayscale(image) - average_color) > 1):
-                print('motion detected')
-
-            average_color = newAverageColorGrayscale(image)
-            # cv2.imwrite("/home/pi/sentient-cnc/images/good{}.jpg"
-            #             .format(datetime.datetime.now()), image)
-        elif running == "b":
-            # cv2.imwrite("/home/pi/sentient-cnc/images/bad{}.jpg"
-            #             .format(datetime.datetime.now()), image)
+        else:
+            # Todo: package data with a label
             pass
 
-        moments.append({"audio": "audio",
+        moments.append({"audio": "aud",
                         "image": image,
                         "timestamp": datetime.datetime.now()
                         })
@@ -141,13 +122,13 @@ if __name__ == '__main__':
 
         # data_handler.write(moments)
 
-        if counter > 30:
+        if counter > 10:
             run = False
         counter += 1
-
-    for moment in moments:
-        print(moment["audio"], moment["timestamp"])
 
     # Release the capture
     cap.release()
     cv2.destroyAllWindows()
+
+    for moment in moments:
+        print(moment.get('audio', 'Not Found'))
