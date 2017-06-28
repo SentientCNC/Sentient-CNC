@@ -62,8 +62,9 @@ class data_handler():
             # Writing Locally
             ###########################################
             img_file = timestamp + ".jpg"
-            img_folder = '/'.join([self.directory, self.sensor_name, 'images'])
-            img_path = '/'.join([img_folder, img_file])
+            img_folder = (os.sep).join([self.directory, self.sensor_name, 'images'])
+            img_path = (os.sep).join([img_folder, img_file])
+            print('image path is', img_path)
 
             if not os.path.isdir(img_folder):
                 os.makedirs(img_folder)
