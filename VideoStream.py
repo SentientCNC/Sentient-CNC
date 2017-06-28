@@ -47,11 +47,6 @@ if __name__ == '__main__':
              ord('i'): 'machine idle',
              255: 'No Entry'}
 
-    metadata = {
-        'frame_width': cap.get(propId=3),
-        'frame_height': cap.get(propId=4),
-    }
-
     running = "n"
     chunk = 1024
 
@@ -73,7 +68,7 @@ if __name__ == '__main__':
     #    if stream.is_stopped():
     #        stream.start_stream()
     #    buf = stream.read(1024)
-    #    if buf:
+    #    if buf:q
     #        stream.stop_stream()
     #        decoder.process_raw(buf, False, False)
 
@@ -108,12 +103,15 @@ if __name__ == '__main__':
         if user_input == 255 and last_input != 255:
             user_input = last_input
 
+        # TODO: incorporate sound into the data package
         moments["audio"] = "aud"
         moments["image"] = image
         moments["timestamp"] = datetime.datetime.now()
         moments["label"] = label.get(user_input, None)
-        moments.update(metadata)
+        moments['frame_width'] = cap.get(propId=3)
+        moments['frame_height'] = cap.get(propId=4)
 
+        # TODO: Incorporate BOTO streaming into data_handler program
         # data_store.write(moments)
 
         if counter > 30:
