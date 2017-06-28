@@ -52,10 +52,6 @@ if __name__ == '__main__':
         'frame_height': cap.get(propId=4),
     }
 
-    print('Beginning Capture Device opening...\n')
-    print('Capture device opened?', cap.isOpened())
-    print('Video Capture Parameters\n-----------------\n\n')
-
     running = "n"
     chunk = 1024
 
@@ -118,7 +114,7 @@ if __name__ == '__main__':
         moments["label"] = label.get(user_input, None)
         moments.update(metadata)
 
-        data_handler.write(moments)
+        # data_store.write(moments)
 
         if counter > 30:
             run = False
