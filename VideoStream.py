@@ -33,9 +33,11 @@ def callback(in_data, frame_count, time_info, flag):
 
 if __name__ == '__main__':
 
+    # Initialize an input (no key creates a value of 255)
     cap = cv2.VideoCapture(0)
-
-    moments = []
+    user_input = cv2.waitKey(0) & 0xFF
+    data_store = data_handler()
+    moments = {}
 
     # data label dictionary
     label = {ord('b'): 'tool break',
@@ -87,8 +89,6 @@ if __name__ == '__main__':
 
     counter = 0
     run = True
-    # Initialize an input (no key creates a value of 255)
-    user_input = cv2.waitKey(0) & 0xFF
 
     while run:
         # listen
@@ -104,25 +104,23 @@ if __name__ == '__main__':
         last_input = user_input
         user_input = cv2.waitKey(1) & 0xFF
 
-        if user_input is not last_input:
-            print('user input:', label.get(user_input, 'Not found'))
-
+        # quitting sequence
         if user_input == ord('q'):
             break
 
-        else:
-            # Todo: package data with a label
-            pass
+        # keep the last pressed key as label
+        if user_input == 255 and last_input != 255:
+            user_input = last_input
 
-        moments.append({"audio": "aud",
-                        "image": image,
-                        "timestamp": datetime.datetime.now()
-                        })
-        moments.append(metadata)
+        moments["audio"] = "aud"
+        moments["image"] = image
+        moments["timestamp"] = datetime.datetime.now()
+        moments["label"] = label.get(user_input, None)
+        moments.update(metadata)
 
-        # data_handler.write(moments)
+        data_handler.write(moments)
 
-        if counter > 10:
+        if counter > 30:
             run = False
         counter += 1
 
@@ -130,5 +128,5 @@ if __name__ == '__main__':
     cap.release()
     cv2.destroyAllWindows()
 
-    for moment in moments:
-        print(moment.get('audio', 'Not Found'))
+    # for moment in moments:
+    #     print(moment.get('audio', 'Not Found'))
